@@ -78,13 +78,14 @@
     <!-- Download a single file:
        - Computes the full target file name (DesiredFile).
        - If DesiredFile already exists, the download is skipped.
-       - Otherwise, creates a temporary folder (TempDownload), 
+       - Otherwise, creates a temporary folder under obj/model-downloads,
          downloads the file there using DownloadFile, and then moves it
          to DesiredFile. Finally, cleans up the temporary folder.  -->
     <Target Name="DownloadSingleFile" DependsOnTargets="EnsureFolders">
         <!-- (These properties come in via the MSBuild call.) -->
         <PropertyGroup>
             <DesiredFile>$([System.IO.Path]::Combine($(DestinationFolder), $(LocalFileName)))</DesiredFile>
+            <TempDownloadFolder>$([System.IO.Path]::Combine('$(BaseIntermediateOutputPath)', 'model-downloads', '$(LocalFileName)'))</TempDownloadFolder>
         </PropertyGroup>
 
         <Message Text="Processing file: $(DesiredFile)" Importance="high" />
@@ -100,20 +101,20 @@
         <Message Text="File $(DesiredFile) already exists; skipping download." Importance="high" Condition=" '$(DownloadNeeded)'=='false' " />
 
         <!-- Only download if required -->
-        <DownloadFile SourceUrl="$(SourceUrl)" DestinationFolder="TempDownload" SkipUnchangedFiles="true" Condition=" '$(DownloadNeeded)'=='true' " />
+        <RemoveDir Directories="$(TempDownloadFolder)" Condition=" '$(DownloadNeeded)'=='true' and Exists('$(TempDownloadFolder)')" />
+        <DownloadFile SourceUrl="$(SourceUrl)" DestinationFolder="$(TempDownloadFolder)" SkipUnchangedFiles="true" Retries="3" Condition=" '$(DownloadNeeded)'=='true' " />
 
         <!-- If a file was downloaded, move it to the desired name.
-         We assume TempDownload now contains the downloaded file.
-         (You might want to refine this if TempDownload could ever contain multiple files.) -->
+         We assume TempDownloadFolder now contains the downloaded file. -->
         <ItemGroup Condition=" '$(DownloadNeeded)'=='true' ">
-            <TempFile Include="TempDownload/*.*" />
+            <TempFile Include="$(TempDownloadFolder)/*.*" />
         </ItemGroup>
         <Message Text="Downloaded file (temp): @(TempFile)" Importance="high" Condition=" '$(DownloadNeeded)'=='true' " />
         <Move SourceFiles="@(TempFile)" DestinationFiles="$(DesiredFile)" Condition=" '$(DownloadNeeded)'=='true' and @(TempFile) != '' " />
         <Message Text="Renamed downloaded file to $(DesiredFile)" Importance="high" Condition=" '$(DownloadNeeded)'=='true' and @(TempFile) != '' " />
 
         <!-- Remove the temporary download folder -->
-        <RemoveDir Directories="TempDownload" Condition="Exists('TempDownload')" />
+        <RemoveDir Directories="$(TempDownloadFolder)" Condition="Exists('$(TempDownloadFolder)')" />
     </Target>
 
     <!-- Main target to process each file by calling the DownloadSingleFile target for each item.
