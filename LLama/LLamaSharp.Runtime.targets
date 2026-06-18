@@ -1,7 +1,25 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <IncludeBuiltInRuntimes Condition="'$(IncludeBuiltInRuntimes)' == ''">true</IncludeBuiltInRuntimes>
+        <LLamaSharpOptionalRuntimeDepsRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)runtimes/deps/cu13.2.0/'))</LLamaSharpOptionalRuntimeDepsRoot>
     </PropertyGroup>
+
+    <Target Name="RemoveMissingOptionalBuiltInRuntimes"
+            BeforeTargets="_CopyOutOfDateSourceItemsToOutputDirectory;_CopyOutOfDateSourceItemsToOutputDirectoryAlways;_CopyDifferingSourceItemsToOutputDirectory"
+            Condition="'$(IncludeBuiltInRuntimes)' == 'true'">
+        <ItemGroup>
+            <_SourceItemsToCopyToOutputDirectory
+                Remove="@(_SourceItemsToCopyToOutputDirectory)"
+                Condition="!Exists('%(_SourceItemsToCopyToOutputDirectory.FullPath)') and $([System.String]::Copy('%(_SourceItemsToCopyToOutputDirectory.FullPath)').StartsWith('$(LLamaSharpOptionalRuntimeDepsRoot)'))" />
+            <_SourceItemsToCopyToOutputDirectoryAlways
+                Remove="@(_SourceItemsToCopyToOutputDirectoryAlways)"
+                Condition="!Exists('%(_SourceItemsToCopyToOutputDirectoryAlways.FullPath)') and $([System.String]::Copy('%(_SourceItemsToCopyToOutputDirectoryAlways.FullPath)').StartsWith('$(LLamaSharpOptionalRuntimeDepsRoot)'))" />
+            <_SourceItemsToCopyToOutputDirectoryIfDifferent
+                Remove="@(_SourceItemsToCopyToOutputDirectoryIfDifferent)"
+                Condition="!Exists('%(_SourceItemsToCopyToOutputDirectoryIfDifferent.FullPath)') and $([System.String]::Copy('%(_SourceItemsToCopyToOutputDirectoryIfDifferent.FullPath)').StartsWith('$(LLamaSharpOptionalRuntimeDepsRoot)'))" />
+        </ItemGroup>
+    </Target>
+
     <ItemGroup Condition="'$(IncludeBuiltInRuntimes)' == 'true'">
 
       <None Include="$(MSBuildThisFileDirectory)runtimes/deps/noavx/llama.dll">
