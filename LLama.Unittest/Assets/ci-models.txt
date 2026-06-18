@@ -1,0 +1,7 @@
+# repo_id,filename[,local_filename]
+bartowski/Llama-3.2-1B-Instruct-GGUF,Llama-3.2-1B-Instruct-Q4_0.gguf
+HuggingFaceTB/smollm-360M-instruct-v0.2-Q8_0-GGUF,smollm-360m-instruct-add-basics-q8_0.gguf
+gpustack/jina-reranker-v1-tiny-en-GGUF,jina-reranker-v1-tiny-en-FP16.gguf
+leliuga/all-MiniLM-L12-v2-GGUF,all-MiniLM-L12-v2.Q8_0.gguf
+ggml-org/gemma-3-4b-it-GGUF,gemma-3-4b-it-Q4_K_M.gguf
+ggml-org/gemma-3-4b-it-GGUF,mmproj-model-f16.gguf,gemma-mmproj-model-f16.gguf
