@@ -46,7 +46,12 @@ namespace LLama.Native
             {
                 if (_majorCudaVersion == -1 && _skipCheck)
                 {
-                    // Currently only 11 and 12 are supported.
+                    // Try newer CUDA runtimes first when explicit version checks are skipped.
+                    var cuda13LibraryPath = GetCudaPath(systemInfo, 13, logCallback);
+                    if (cuda13LibraryPath is not null)
+                    {
+                        yield return cuda13LibraryPath;
+                    }
                     var cuda12LibraryPath = GetCudaPath(systemInfo, 12, logCallback);
                     if (cuda12LibraryPath is not null)
                     {
